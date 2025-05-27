@@ -4,7 +4,6 @@ import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import {Link, Image as LucideImage, Palette, Download, Sparkles, Plus, Copy } from "lucide-react";
 import { toast } from "react-hot-toast";
-import Image from 'next/image';
 
 const solidColors: string[] = [
   "#000000", // Black
