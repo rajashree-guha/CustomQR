@@ -315,11 +315,7 @@ export default function QrGeneratorSection( { className }: { className?: string 
                       setEmoji('');
                    }}
                 >
-                  {logoImage && centerImageType === 'logo' ? (
-                    <Image src={logoImage as string} alt="Selected Logo" className="mx-auto h-8 object-contain" width={32} height={32} />
-                  ) : (
-                    <span className={`flex items-center justify-center gap-1 text-gray-700 dark:text-gray-300 ${centerImageType === 'logo' ? 'text-blue-800 dark:text-blue-200 font-semibold' : ''}`}><LucideImage className="w-4 h-4"/>Logo</span>
-                  )}
+                  <span className={`flex items-center justify-center gap-1 text-gray-700 dark:text-gray-300 ${centerImageType === 'logo' ? 'text-blue-800 dark:text-blue-200 font-semibold' : ''}`}><LucideImage className="w-4 h-4"/>Logo</span>
                 </div>
 
               </div>
