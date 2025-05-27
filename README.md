@@ -2,6 +2,12 @@
 
 Tired of boring, basic QR codes? Transform your links into stunning, personalized QR codes that stand out! Now you can also make QR codes out of text, which can be fun to share with your friends and family. Add your favorite emojis, logos, and beautiful gradients to create QR codes that are as unique as your brand. Create eye-catching QR codes that people actually want to scan!
 
+## Preview
+
+![Custom QR Code Preview](/client/public/assests/image.png)
+
+[Live Demo](https://custom-qr-seven.vercel.app/)
+
 ## Features
 
 - Generate QR codes from URLs or text
