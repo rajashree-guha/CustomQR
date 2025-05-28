@@ -1,6 +1,6 @@
 # CustomQR
 
-Tired of boring, basic QR codes? Transform your links into stunning, personalized QR codes that stand out! Now you can also make QR codes out of text, which can be fun to share with your friends and family. Add your favorite emojis, logos, and beautiful gradients to create QR codes that are as unique as your brand. Create eye-catching QR codes that people actually want to scan!
+Tired of boring, basic QR codes? Transform your links into stunning, personalized QR codes that stand out! Add your favorite emojis, logos, and beautiful gradients to create QR codes that are as unique as your brand. Create eye-catching QR codes that people actually want to scan!
 
 ## Preview
 
@@ -10,7 +10,7 @@ Tired of boring, basic QR codes? Transform your links into stunning, personalize
 
 ## Features
 
-- Generate QR codes from URLs or text
+- Generate QR codes from URLs
 - Add custom emojis or logos to your QR codes
 - Multiple gradient color options for QR code styling
 - Download QR codes 

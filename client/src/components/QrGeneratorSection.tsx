@@ -50,12 +50,6 @@ const floatAnimation = `
   }
 }
 `;
-
-// Move this code inside a useEffect hook
-// const style = document.createElement('style');
-// style.textContent = floatAnimation;
-// document.head.appendChild(style);
-
 // QR Code Generator Section
 export default function QrGeneratorSection( { className }: { className?: string } ) {
   const [inputValue, setInputValue] = useState('');
@@ -70,18 +64,27 @@ export default function QrGeneratorSection( { className }: { className?: string 
   const [solidColor, setSolidColor] = useState<string>('#06B6D4'); 
   const colorPickerRef = useRef<HTMLInputElement>(null); 
   const qrRef = useRef<HTMLDivElement>(null);
+  const [validationError, setValidationError] = useState('');
 
-  // Effect to inject the animation style
+  // Function to validate URL
+  const isValidUrl = (urlString: string): boolean => {
+    try {
+      const url = new URL(urlString);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = floatAnimation;
     document.head.appendChild(style);
 
-    // Clean up the style tag on component unmount
     return () => {
       document.head.removeChild(style);
     };
-  }, []); // Empty dependency array ensures this runs once on mount
+  }, []); 
 
   useEffect(() => {
     if (qrValue && qrRef.current) {
@@ -132,6 +135,11 @@ export default function QrGeneratorSection( { className }: { className?: string 
         backgroundOptions: {
           color: "#ffffff", 
         },
+        qrOptions: {
+          typeNumber: 0,
+          mode: 'Byte',
+          errorCorrectionLevel: 'H'
+        },
       });
 
       qr.append(qrRef.current);
@@ -139,9 +147,9 @@ export default function QrGeneratorSection( { className }: { className?: string 
   }, [qrValue, emoji, centerImageType, logoImage, selectedGradientIndex, colorMode, solidColor]);
 
   const handleGenerateQr = () => {
-    if (inputValue.trim()) {
+    if (inputValue.trim() && !validationError) {
       setLoading(true);
-      setQrValue(inputValue);
+      setQrValue(inputValue.trim());
       setLoading(false);
     }
   };
@@ -193,12 +201,20 @@ export default function QrGeneratorSection( { className }: { className?: string 
     }, 'image/png');
   };
 
+  const handleReset = () => {
+    setInputValue('');
+    setQrValue('');
+    setValidationError('');
+    setEmoji(''); 
+    setLogoImage(null);
+    setCenterImageType('none');
+  };
+
   return (
     <div 
       className={`py-4 px-4 flex-grow flex flex-col justify-center items-center ${className}`}
       style={{
         backgroundImage: `url('/assests/backgroundImg.png')`,
-        // background: 'radial-gradient(at center top, #0397A6, #030712)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -206,7 +222,7 @@ export default function QrGeneratorSection( { className }: { className?: string 
     >
       <div className="text-center mb-8 px-4 w-3/4 mx-auto">
         <h1 className='text-xl md:text-4xl font-bold text-gray-800 dark:text-gray-200 leading-relaxed md:leading-loose'>
-        Create <span className="bg-gradient-to-r from-blue-700 to-cyan-500 text-transparent bg-clip-text">stunning, personalized</span> QR codes from links and text!
+        Create <span className="bg-gradient-to-r from-blue-700 to-cyan-500 text-transparent bg-clip-text">stunning, personalized</span> QR codes from links!
         </h1>
       </div>
 
@@ -227,21 +243,34 @@ export default function QrGeneratorSection( { className }: { className?: string 
             <div>
               <label htmlFor="url-text" className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <Link className="w-5 h-5" />
-                URL or Text
+                URL
               </label>
               <input
-                type="text"
+                type="url"
                 id="url-text"
-                placeholder="Paste your link or message here..."
-                className="mt-1 block w-full p-3 rounded-xl text-gray-800 dark:text-gray-200 placeholder-white dark:placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-300 dark:border-gray-600"
+                placeholder="Enter URL"
+                className={`mt-1 block w-full p-3 rounded-xl text-gray-800 dark:text-gray-200 placeholder-white dark:placeholder-white focus:outline-none focus:ring-2 ${validationError ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500 border-gray-300 dark:border-gray-600'}`}
                 style={{
                   backgroundColor: 'rgba(243, 241, 241, 0.15)',
                   backdropFilter: 'blur(5px)',
                   WebkitBackdropFilter: 'blur(5px)',
                 }}
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setInputValue(newValue);
+                  if (!isValidUrl(newValue.trim())) {
+                    setValidationError('Please enter a valid URL');
+                  } else {
+                    setValidationError(''); 
+                  }
+                }}
+                pattern="https?://.+"
+                title="Please enter a valid URL starting with http:// or https://"
               />
+              {validationError && (
+                 <p className="text-red-500 text-sm mt-1">{validationError}</p>
+              )}
             </div>
 
             <div>
@@ -250,7 +279,7 @@ export default function QrGeneratorSection( { className }: { className?: string 
                 Center Image
               </label>
               <div className="flex flex-wrap items-center gap-4 mb-4">
-                <div className={`flex-grow-0 w-full md:flex-grow md:w-0 text-center p-2 rounded-xl cursor-pointer border ${centerImageType === 'none' ? 'border-blue-600 dark:border-blue-500 shadow-sm' : 'border-gray-300 dark:border-gray-600'}`}
+                <div className={`flex-grow-0 w-full md:flex-grow md:w-0 text-center p-2 rounded-xl cursor-pointer border ${centerImageType === 'none' ? 'border-blue-600 dark:border-blue-500 shadow-md' : 'border-gray-300 dark:border-gray-600'}`}
                    style={{
                      background: centerImageType === 'none' ? 'linear-gradient(to right, rgba(6, 182, 212, 0.5), rgba(59, 130, 246, 0.5))': 'rgba(243, 241, 241, 0.15)',
                      backdropFilter: 'blur(5px)',
@@ -276,12 +305,12 @@ export default function QrGeneratorSection( { className }: { className?: string 
                 </div>
 
                 {/* Emoji Option */}
-                <div className={`flex-grow-0 w-full md:flex-grow md:w-0 text-center p-2 rounded-xl cursor-pointer border ${centerImageType === 'emoji' ? 'border-blue-600 dark:border-blue-500 shadow-sm' : 'border-gray-300 dark:border-gray-600'}`}
+                <div className={`flex-grow-0 w-full md:flex-grow md:w-0 text-center p-2 rounded-xl cursor-pointer border ${centerImageType === 'emoji' ? 'border-blue-600 dark:border-blue-500 shadow-md' : 'border-gray-300 dark:border-gray-600'}`}
                    style={{
-                     background: centerImageType === 'emoji' ? 'linear-gradient(to right, rgba(6, 182, 212, 0.5), rgba(59, 130, 246, 0.5))': 'rgba(243, 241, 241, 0.15)',
+                     background: centerImageType === 'emoji' ? 'linear-gradient(to right, rgba(6, 182, 212, 0.8), rgba(59, 130, 246, 0.8))': 'rgba(243, 241, 241, 0.15)',
                      backdropFilter: 'blur(5px)',
                      WebkitBackdropFilter: 'blur(5px)',
-                     transition: 'background 0.3s ease-in-out',
+                     transition: 'background 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
                    }}
                    onMouseEnter={() => {}}
                    onClick={() => {
@@ -297,16 +326,16 @@ export default function QrGeneratorSection( { className }: { className?: string 
                     checked={centerImageType === 'emoji'}
                     onChange={() => {}}
                   />
-                  <span className={`flex items-center justify-center gap-1 text-gray-700 dark:text-gray-300 ${centerImageType === 'emoji' ? 'text-blue-800 dark:text-blue-200 font-semibold' : ''}`}>😊 Emoji</span>
+                  <span className={`flex items-center justify-center gap-1 text-gray-700 dark:text-gray-300 ${centerImageType === 'emoji' ? 'text-white font-semibold' : ''}`}>😊 Emoji</span>
                 </div>
 
                 {/* Logo Option */}
-                <div className={`flex-grow-0 w-full md:flex-grow md:w-0 text-center p-2 rounded-xl cursor-pointer border ${centerImageType === 'logo' ? 'border-blue-600 dark:border-blue-500 shadow-sm' : 'border-gray-300 dark:border-gray-600'}`}
+                <div className={`flex-grow-0 w-full md:flex-grow md:w-0 text-center p-2 rounded-xl cursor-pointer border ${centerImageType === 'logo' ? 'border-blue-600 dark:border-blue-500 shadow-md' : 'border-gray-300 dark:border-gray-600'}`}
                    style={{
-                     background: centerImageType === 'logo' ? 'linear-gradient(to right, rgba(6, 182, 212, 0.5), rgba(59, 130, 246, 0.5))': 'rgba(243, 241, 241, 0.15)',
+                     background: centerImageType === 'logo' ? 'linear-gradient(to right, rgba(6, 182, 212, 0.8), rgba(59, 130, 246, 0.8))': 'rgba(243, 241, 241, 0.15)',
                      backdropFilter: 'blur(5px)',
                      WebkitBackdropFilter: 'blur(5px)',
-                     transition: 'background 0.3s ease-in-out',
+                     transition: 'background 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
                    }}
                    onMouseEnter={() => {}}
                    onClick={() => {
@@ -314,7 +343,7 @@ export default function QrGeneratorSection( { className }: { className?: string 
                       setEmoji('');
                    }}
                 >
-                  <span className={`flex items-center justify-center gap-1 text-gray-700 dark:text-gray-300 ${centerImageType === 'logo' ? 'text-blue-800 dark:text-blue-200 font-semibold' : ''}`}><LucideImage className="w-4 h-4"/>Logo</span>
+                  <span className={`flex items-center justify-center gap-1 text-gray-700 dark:text-gray-300 ${centerImageType === 'logo' ? 'text-white font-semibold' : ''}`}><LucideImage className="w-4 h-4"/>Logo</span>
                 </div>
 
               </div>
@@ -333,7 +362,7 @@ export default function QrGeneratorSection( { className }: { className?: string 
                      {emoji ? emoji : '😊 Select Emoji'}
                    </button>
                   {showEmojiPicker && (
-                    <div className="absolute z-10" style={{ bottom: '100%', left: '0' }}>
+                    <div className="absolute z-10 w-full max-w-sm md:max-w-md lg:max-w-lg" style={{ bottom: '10%', right: '40%' }}>
                       <Picker
                         data={data}
                         onEmojiSelect={(emoji: { native: string }) => {
@@ -444,17 +473,26 @@ export default function QrGeneratorSection( { className }: { className?: string 
               )}
             </div>
 
-            {/* Generate Button */}
-            <button
-              className="w-1/2 p-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold flex items-center justify-center gap-2 hover:from-blue-700 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed" 
-              onClick={() => {
-                handleGenerateQr();
-              }}
-              disabled={!inputValue.trim()}
-            >
-               <Sparkles className="w-6 h-6" />
-              {loading ? 'Generating...' : 'Generate'}
-            </button>
+            {/* Generate and Reset Buttons */}
+            <div className="flex flex-col md:flex-row gap-4 pt-2">
+              <button
+                className="w-full md:w-1/2 p-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold flex items-center justify-center gap-2 hover:from-blue-700 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed" 
+                onClick={handleGenerateQr}
+                disabled={!inputValue.trim() || !!validationError}
+              >
+                 <Sparkles className="w-6 h-6" />
+                {loading ? 'Generating...' : 'Generate'}
+              </button>
+
+               {/* Reset Button */}
+              <button
+                className="w-full md:w-1/2 p-3 rounded-xl bg-gray-300 text-gray-800 font-semibold flex items-center justify-center gap-2 hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleReset}
+                disabled={!inputValue && !qrValue}
+              >
+                Reset
+              </button>
+            </div>
           </div>
 
           <div className="hidden md:block w-[1px] bg-gradient-to-b from-transparent via-blue-500 to-transparent dark:via-cyan-500"></div>
@@ -511,7 +549,7 @@ export default function QrGeneratorSection( { className }: { className?: string 
                   <Sparkles className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-gray-800 dark:text-gray-200 text-2xl font-semibold mb-2">Ready to Generate</h2>
-                <p className="text-gray-600 dark:text-gray-400 text-center">Enter a URL or text and click generate</p>
+                <p className="text-gray-600 dark:text-gray-400 text-center">Enter URL and click generate</p>
               </div>
             )}
           </div>
